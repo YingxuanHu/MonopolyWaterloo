@@ -22,7 +22,7 @@ void Display::DisplayBoard(Game & g){
         int ploc = g.GamePlayers.at(i)->getPosition();
         cout << "Player " << player << " is at " << ploc << endl;
     }
-    cout << g.getCurPlayerName() << "'s turn:";
+    cout << g.getCurPlayerName() << "'s turn:" << endl;
 }
 
 

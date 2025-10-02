@@ -1,6 +1,38 @@
 #include "controller.h"
 #include <algorithm>
+#include <cctype>
 #include <iostream>
+#include <string>
+
+namespace {
+const std::vector<char> TOKEN_POOL {
+    'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+    '0','1','2','3','4','5','6','7','8','9'
+};
+
+bool tokenTaken(char token, const std::vector<std::string> &chosenTokens) {
+    std::string tokenStr(1, token);
+    return std::find(chosenTokens.begin(), chosenTokens.end(), tokenStr) != chosenTokens.end();
+}
+
+bool tokenAvailable(char token) {
+    return std::find(TOKEN_POOL.begin(), TOKEN_POOL.end(), token) != TOKEN_POOL.end();
+}
+
+std::string formatAvailableTokens(const std::vector<std::string> &chosenTokens) {
+    std::string result;
+    for (const auto &candidate : TOKEN_POOL) {
+        if (tokenTaken(candidate, chosenTokens)) {
+            continue;
+        }
+        if (!result.empty()) {
+            result += ", ";
+        }
+        result += candidate;
+    }
+    return result;
+}
+}
 
 
 bool Controller::CommandArgs(int argc, char * argv[], bool &testing, bool &load, string &loadfile){
@@ -130,16 +162,28 @@ bool Controller::NewGame(vector <Location *> &WATOPOLYBoard, vector <Player*> & 
         }
 
         SuccessInput = false;
-        cout << "Player " << i << ", Choose Your Token" << endl;;
+        cout << "Player " << i << ", Choose Your Token" << endl;
+        cout << "Available tokens: " << formatAvailableTokens(tokens) << endl;
         while (!SuccessInput && cin >> input){
             if(input.length() != 1){
-                cout << "Invalid Token. Try Again" << endl;
-            } else if(find(tokens.begin(), tokens.end(), input) != tokens.end()){
-                cout << "Token Already Taken. Try Again" << endl;
-            } else{
-                SuccessInput = true;
-                tokens.emplace_back(input);
+                cout << "Invalid Token. Choose a single character from: " << formatAvailableTokens(tokens) << endl;
+                continue;
             }
+
+            char candidate = static_cast<char>(toupper(static_cast<unsigned char>(input[0])));
+            if (!tokenAvailable(candidate)){
+                cout << "Invalid Token. Choose one of: " << formatAvailableTokens(tokens) << endl;
+                continue;
+            }
+
+            std::string normalized(1, candidate);
+            if(find(tokens.begin(), tokens.end(), normalized) != tokens.end()){
+                cout << "Token Already Taken. Remaining tokens: " << formatAvailableTokens(tokens) << endl;
+                continue;
+            }
+
+            SuccessInput = true;
+            tokens.emplace_back(normalized);
         }
         if (!SuccessInput){
             return false;

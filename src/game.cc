@@ -10,14 +10,8 @@
 
 
 Game::~Game(){
-    for (auto i = 0; i < (int) WATOPOLYBoard.size(); i++){
-        delete WATOPOLYBoard.at(i);
-    }
+    // Game does not own the board or players; they are managed by main.
     WATOPOLYBoard.clear();
-
-    for (auto i = 0; i < (int) GamePlayers.size(); i++){
-        delete GamePlayers.at(i);
-    }
     GamePlayers.clear();
 }
 

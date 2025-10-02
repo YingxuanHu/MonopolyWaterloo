@@ -1,16 +1,23 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -MMD -g -Werror=vla
+CXXFLAGS = -std=c++11 -Wall -MMD -g -Werror=vla -Iinclude
 EXEC = watopoly
-OBJECTS = main.o controller.o display.o game.o location.o player.o property.o PropertyGym.o PropertyRegular.o PropertyResidence.o subject.o 
-DEPENDS = ${OBJECTS:.o=.d}
+SRC_DIR = src
+OBJ_DIR = build
 
-${EXEC}: ${OBJECTS}
-	${CXX} ${CXXFLAGS} ${OBJECTS} -o ${EXEC}
+SOURCES = $(wildcard $(SRC_DIR)/*.cc)
+OBJECTS = $(patsubst $(SRC_DIR)/%.cc,$(OBJ_DIR)/%.o,$(SOURCES))
+DEPENDS = $(OBJECTS:.o=.d)
 
--include ${DEPENDS}
+$(EXEC): $(OBJECTS)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cc
+	@mkdir -p $(OBJ_DIR)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+-include $(DEPENDS)
 
 .PHONY: clean
 
 clean:
-	rm ${OBJECTS} ${EXEC} ${DEPENDS}
-
+	rm -rf $(OBJ_DIR) $(EXEC)

@@ -1,6 +1,25 @@
 #include "controller.h"
 #include <algorithm>
 #include <iostream>
+#include <string>
+
+namespace {
+void PrintCommandHelp(){
+    using std::cout;
+    using std::endl;
+    cout << "Available commands:" << endl;
+    cout << "  roll        - Roll the dice and move. You may roll again if you get doubles." << endl;
+    cout << "  next        - End your turn once you have finished all actions." << endl;
+    cout << "  trade NAME GIVE RECEIVE - Offer a trade to another player." << endl;
+    cout << "  improve PROPERTY buy|sell - Buy or sell an improvement on a property you own." << endl;
+    cout << "  mortgage PROPERTY - Mortgage a property for cash." << endl;
+    cout << "  unmortgage PROPERTY - Pay to unmortgage a property." << endl;
+    cout << "  bankrupt    - Declare bankruptcy if you cannot pay what you owe." << endl;
+    cout << "  assets      - Show your current money, properties, and improvements." << endl;
+    cout << "  save FILE   - Save the current game state to FILE." << endl;
+    cout << "  help        - Display this command list again." << endl;
+}
+}
 
 int main( int argc, char * argv[] ) {
     Controller c {};
@@ -131,11 +150,15 @@ int main( int argc, char * argv[] ) {
     Commands.emplace_back("unmortgage");
     Commands.emplace_back("bankrupt");
     Commands.emplace_back("assets");
-    Commands.emplace_back("all");
     Commands.emplace_back("save");
+    Commands.emplace_back("help");
 
     cout << "Starting Game" << endl;
     WATOPOLY.DisplayGame();
+    cout << endl;
+    cout << "Type commands to play, or enter 'help' for a reminder." << endl;
+    PrintCommandHelp();
+    cout << "Command? (type 'help' for options)" << endl;
 
     string input;
     bool Action = false;
@@ -143,7 +166,9 @@ int main( int argc, char * argv[] ) {
     while (cin >> input){
         Action = false;
         if(find(Commands.begin(), Commands.end(), input) != Commands.end()){
-            if (input == "roll"){
+            if (input == "help"){
+                PrintCommandHelp();
+            } else if (input == "roll"){
                 if (WATOPOLY.getMove()){
                     WATOPOLY.DoTurn();
                 } else{
@@ -226,12 +251,21 @@ int main( int argc, char * argv[] ) {
                 if (!Action){
                     cout << "assets Failed: Player in Debt" << endl;
                 }
+            } else if (input == "save"){
+                string filename;
+                if (cin >> filename){
+                    WATOPOLY.SaveGame(filename);
+                    cout << "Game saved to " << filename << endl;
+                } else{
+                    c.FailInput(WATOPOLY);
+                    return -1;
+                }
             }
         } else{
-            cout << "Invalid Input, Try Again" << endl;
+            cout << "Invalid input. Type 'help' to see all available commands." << endl;
         }
         WATOPOLY.DisplayGame();
-        cout << "Command?" << endl;
+        cout << "Command? (type 'help' for options)" << endl;
     }
 
     return 0;
